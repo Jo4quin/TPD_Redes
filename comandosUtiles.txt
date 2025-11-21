@@ -1,0 +1,2 @@
+ chequear cheksum entre dos archivos a y b son iguales:
+ md5sum a.data b.data
