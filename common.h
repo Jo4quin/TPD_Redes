@@ -18,6 +18,7 @@
 // ============================================
 #define SERVER_PORT "20252"
 #define MAX_DATA_SIZE 1470
+#define PDU_HEADER_SIZE 2
 
 // ============================================
 // TIPOS DE MENSAJES

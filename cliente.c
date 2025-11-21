@@ -2,7 +2,7 @@
 
 #define MAX_RETRIES 3
 
-int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq) {
+int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq,int data_size) {
     App_PDU ack;
     int attempts = 0;
     
@@ -15,7 +15,7 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq) {
         // 1. ENVIAR App_PDU
         print_pdu("Enviando pdu", pdu);
         
-        int sent = send(socket, pdu, sizeof(App_PDU), 0);
+        int sent = send(socket, pdu, PDU_HEADER_SIZE+data_size, 0);
         if (sent < 0) {
             perror("Error en send()");
             return -1;
@@ -74,8 +74,10 @@ int fase_hello(int socket, const char* credencial) {
     pdu.type = HELLO;
     pdu.seq_num = 0;
     strncpy(pdu.data, credencial, MAX_DATA_SIZE - 1);
+
+    size_t data_size = strlen(credencial) + 1;  // +1 para null terminator
     
-    return send_and_wait_ack(socket, &pdu, 0);
+    return send_and_wait_ack(socket, &pdu, 0,data_size);
 }
 
 // ============================================
@@ -89,8 +91,10 @@ int fase_wrq(int socket, const char* filename) {
     pdu.type = WRQ;
     pdu.seq_num = 1;
     strncpy(pdu.data, filename, MAX_DATA_SIZE - 1);
+
+    size_t data_size = strlen(filename) + 1;  // +1 para null terminator
     
-    return send_and_wait_ack(socket, &pdu, 1);
+    return send_and_wait_ack(socket, &pdu, 1,data_size);
 }
 
 // ============================================
@@ -121,7 +125,7 @@ int fase_data(int socket, const char* filepath) {
         printf("\n--- Paquete #%d (seq=%d, %zu bytes) ---\n", 
                paquetes_enviados + 1, seq, bytes_leidos);
         
-        if (send_and_wait_ack(socket, &pdu, seq) != 0) {
+        if (send_and_wait_ack(socket, &pdu, seq,bytes_leidos) != 0) {
             fclose(file);
             return -1;
         }
@@ -148,7 +152,7 @@ int fase_fin(int socket, const char* filename, int last_seq) {
     pdu.seq_num = seq;
     // strncpy(pdu.data, filename, MAX_DATA_SIZE - 1);     // por aviso en campus debe ser vacio el campo data en el FIN
     
-    return send_and_wait_ack(socket, &pdu, seq);
+    return send_and_wait_ack(socket, &pdu, seq,0);
 }
 
 // ============================================

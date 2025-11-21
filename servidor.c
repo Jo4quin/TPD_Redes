@@ -94,7 +94,7 @@ int handle_wrq(int socket, App_PDU* pdu, ClientState* client) {
 // ============================================
 // MANEJAR DATA
 // ============================================
-int handle_data(int socket, App_PDU* pdu, ClientState* client) {
+int handle_data(int socket, App_PDU* pdu, ClientState* client,int bytes_recibidos) {
     printf("│ DATA recibido (seq=%d)      │\n", pdu->seq_num);
     
     if (!client->wrq_recibido) {
@@ -114,7 +114,7 @@ int handle_data(int socket, App_PDU* pdu, ClientState* client) {
     }
     
     // Escribir datos en archivo
-    size_t data_len = strnlen(pdu->data, MAX_DATA_SIZE);
+    int data_len = bytes_recibidos - PDU_HEADER_SIZE;
     size_t written = fwrite(pdu->data, 1, data_len, client->file);
     
     printf("Escritos %zu bytes en archivo\n", written);
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
                 break;
                 
             case DATA:
-                handle_data(s, &pdu, &client);
+                handle_data(s, &pdu, &client,received);
                 break;
                 
             case FIN:
