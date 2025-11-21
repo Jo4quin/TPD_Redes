@@ -104,6 +104,8 @@ int handle_data(int socket, App_PDU* pdu, ClientState* client,int bytes_recibido
     
     // Verificar número de secuencia
     uint8_t expected_seq = (client->last_seq == 0) ? 1 : 0;
+
+    sleep(1);  // sleep por 1 segundo, solo para probar lo de la reanudación del timer del cliente.
     
     if (pdu->seq_num != expected_seq) {
         printf("Seq incorrecto (esperaba %d, recibí %d)\n", 
