@@ -63,6 +63,7 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq, int data_s
             } else {
                 // Hay datos listos para leer (ACK recibido)
                 if (fds[0].revents & POLLIN) {
+                    memset(&ack, 0, sizeof(App_PDU));  // Limpiar antes de recibir
                     int received = recv(socket, &ack, sizeof(App_PDU), 0);
 
                     if (received < 0) {
