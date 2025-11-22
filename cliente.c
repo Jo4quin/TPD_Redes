@@ -133,7 +133,7 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq, int data_s
                     
                     // 3. VERIFICAR ACK
                     printf("Se esperaba recibir seq=%d. Recibido type=%d, seq=%d\n", 
-                           expected_seq, ack.type, ack.seq_num);
+                            expected_seq, ack.type, ack.seq_num);
 
                     if (ack.type == ACK && ack.seq_num == expected_seq) {
                         // ✅ ACK CORRECTO: Salir con éxito
@@ -246,7 +246,7 @@ int fase_data(int socket, const char* filepath) {
         memcpy(pdu.data, data_buffer, bytes_leidos);  // copiar datos leídos desde data_buffer a pdu.data
         
         printf("\n--- Paquete #%d (seq=%d, %zu bytes) ---\n", 
-               paquetes_enviados + 1, seq, bytes_leidos);
+                paquetes_enviados + 1, seq, bytes_leidos);
         
         if (send_and_wait_ack(socket, &pdu, seq,bytes_leidos) != 0) {
             fclose(file);

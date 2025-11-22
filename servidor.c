@@ -17,7 +17,7 @@ typedef struct {
 // ENVIAR ACK
 // ============================================
 void send_ack(int socket, struct sockaddr_in* client_addr, socklen_t addr_len, 
-              uint8_t seq_num,const char* mensaje_error) {
+                uint8_t seq_num,const char* mensaje_error) {
     App_PDU ack;
     memset(&ack, 0, sizeof(App_PDU));
     ack.type = ACK;
@@ -27,7 +27,7 @@ void send_ack(int socket, struct sockaddr_in* client_addr, socklen_t addr_len,
     }
     
     sendto(socket, &ack, sizeof(App_PDU), 0, 
-           (struct sockaddr*)client_addr, addr_len);
+            (struct sockaddr*)client_addr, addr_len);
     
     printf("ACK enviado (seq=%d)\n", seq_num);
 }
@@ -109,7 +109,7 @@ int handle_data(int socket, App_PDU* pdu, ClientState* client,int bytes_recibido
     
     if (pdu->seq_num != expected_seq) {
         printf("Seq incorrecto (esperaba %d, recibí %d)\n", 
-               expected_seq, pdu->seq_num);
+                expected_seq, pdu->seq_num);
         // Reenviar último ACK (por si se perdió)
         send_ack(socket, &client->addr, client->addr_len, client->last_seq,NULL);
         return 0;
@@ -221,8 +221,8 @@ int main(int argc, char* argv[]) {
         
         // Recibir App_PDU
         int received = recvfrom(s, &pdu, sizeof(App_PDU), 0,
-                               (struct sockaddr*)&client.addr, 
-                               &client.addr_len);
+                                (struct sockaddr*)&client.addr, 
+                                &client.addr_len);
         
         if (received < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) {
         char client_ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &client.addr.sin_addr, client_ip, sizeof(client_ip));
         printf("\nApp_PDU recibido de %s:%d\n", 
-               client_ip, ntohs(client.addr.sin_port));
+                client_ip, ntohs(client.addr.sin_port));
         print_pdu("   ", &pdu);
         
         // Manejar según tipo
