@@ -56,11 +56,10 @@ const char* type_to_string(uint8_t type) {
 
 // Imprime información de un PDU (para debugging)
 void print_pdu(const char* prefix, App_PDU* pdu) {
-    printf("%s [Type=%s, Seq=%d, DataLen=%zu]\n", 
+    printf("%s [Type=%s, Seq=%d]\n", 
             prefix, 
             type_to_string(pdu->type), 
-            pdu->seq_num,
-            strlen(pdu->data));
+            pdu->seq_num);
 }
 
 #endif // COMMON_H
