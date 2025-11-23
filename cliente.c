@@ -292,7 +292,7 @@ int main(int argc, char* argv[]) {
     
     // FASE 3: DATA
     uint8_t last_data_seq = 0;
-    if (fase_data(s, local_file) != 0) {
+    if (fase_data(s, local_file,&last_data_seq) != 0) {
         fprintf(stderr, "💀 Fallo en FASE 3 (DATA)\n");
         close(s);
         return 1;
