@@ -1,2 +1,5 @@
  chequear cheksum entre dos archivos a y b son iguales:
  md5sum a.data b.data
+
+para ver la ip de una vm:
+ip addr
