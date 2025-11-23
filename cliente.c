@@ -38,16 +38,15 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq, int data_s
         
         printf("Esperando ACK (Max %d ms)...\n", TIMEOUT_MSEC);
 
-        // Estructura pollfd para nuestro socket
-        struct pollfd fds[1];
-        fds[0].fd = socket;
-        fds[0].events = POLLIN; // Monitorear eventos de lectura
+        struct pollfd pfd;   // solo queremos monitorear 1 fd, el de nuestro unico socket
+        pfd.fd = socket;
+        pfd.events = POLLIN;     // el poll despierta con el evento "IN" (llegaron datos para leer)
 
         // Bucle para esperar y procesar paquetes dentro del timer total
         while (current_timeout_ms > 0) {
             
             // poll() bloquea hasta que hay datos o expira el timer restante
-            int poll_res = poll(fds, 1, current_timeout_ms);
+            int poll_res = poll(&pfd, 1, current_timeout_ms);   // 1 = cantidad de fd a monitorear
 
             if (poll_res < 0) {
                 // Error de poll
@@ -61,8 +60,16 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq, int data_s
                 goto next_attempt;
 
             } else {
-                // Hay datos listos para leer (ACK recibido)
-                if (fds[0].revents & POLLIN) {
+                if (pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {     // -> poll despertó debido a eventos de error
+                    if (pfd.revents & POLLERR)
+                        printf("POLLERR: hubo un problema con el socket del servidor\n");
+                    if (pfd.revents & POLLHUP)
+                        printf("POLLHUP: se detectó socket cerrado del servidor\n");
+                    if (pfd.revents & POLLNVAL)
+                        printf("POLLNVAL\n");
+                    return -1;
+                }
+                if (pfd.revents & POLLIN) {                   // POLLIN -> poll despertó debido a evento IN
                     memset(&ack, 0, sizeof(App_PDU));  // Limpiar antes de recibir
                     int received = recv(socket, &ack, sizeof(App_PDU), 0);
 
