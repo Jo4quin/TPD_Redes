@@ -2,7 +2,7 @@
 #include <getopt.h>
 
 void print_usage(const char* prog) {
-    fprintf(stderr, "Uso: %s -h <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg>\n", prog);
+    fprintf(stderr, "Uso: %s -a <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg>\n", prog);
     fprintf(stderr, "  -a: IP del servidor\n");
     fprintf(stderr, "  -d: intervalo entre envíos en milisegundos\n");
     fprintf(stderr, "  -N: duración total de la prueba en segundos\n");
