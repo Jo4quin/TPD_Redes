@@ -1,13 +1,5 @@
 #include "common.h"
 #include <getopt.h>
-#include <signal.h>
-
-volatile int running = 1;
-
-void handle_sigint(int sig) {
-    (void)sig;
-    running = 0;
-}
 
 void print_usage(const char* prog) {
     fprintf(stderr, "Uso: %s -h <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg> [-s <payload_size>]\n", prog);
@@ -44,8 +36,6 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Error: payload debe estar entre %d y %d\n", MIN_PAYLOAD, MAX_PAYLOAD);
         return 1;
     }
-
-    signal(SIGINT, handle_sigint);
 
     printf("\n╔════════════════════════════════════════╗\n");
     printf("║  CLIENTE TCP - ONE WAY DELAY           ║\n");
@@ -106,7 +96,7 @@ int main(int argc, char* argv[]) {
     gettimeofday(&start, NULL);
     int pdu_count = 0;
 
-    while (running && pdu_count < total_pdus) {
+    while (pdu_count < total_pdus) {
         // Obtener timestamp justo antes de enviar
         pdu.origin_timestamp = get_timestamp_us();
 
