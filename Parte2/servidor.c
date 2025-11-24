@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
         // Buffer para lecturas parciales
         uint8_t buffer[BUFFER_SIZE];
         uint8_t pdu_buffer[MAX_PDU_SIZE];
+        memset(&pdu_buffer,0,MAX_PDU_SIZE)
         size_t pdu_offset = 0;
         int pdu_count = 0;
 
