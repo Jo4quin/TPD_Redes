@@ -54,10 +54,9 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq, int data_s
                 return -1;
 
             } else if (poll_res == 0) {
+                printf("poll=0");
                 // TIMEOUT: No se recibieron datos en el tiempo restante
-                attempts++;
-                printf("TIMEOUT - Reintento %d/%d\n", attempts, MAX_RETRIES);
-                goto next_attempt;
+                break;
 
             } else {
                 if (pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {     // -> poll despertó debido a eventos de error
@@ -108,23 +107,14 @@ int send_and_wait_ack(int socket, App_PDU* pdu, uint8_t expected_seq, int data_s
                         current_timeout_ms = TIMEOUT_MSEC - (int)elapsed_ms;
                         printf("current timeout ms: %i",current_timeout_ms);
                         
-                        if (current_timeout_ms <= 0) {
-                            // Si el tiempo restante es 0 o negativo, forzar el timeout
-                            goto handle_timeout;
-                        }
-                        
                         // Volver al inicio del bucle while para un nuevo poll con el tiempo restante.
                     }
                 }
             }
         }
-        
-        handle_timeout:
         // Si el bucle while(current_timeout_ms > 0) termina porque el tiempo se acabó
         attempts++;
         printf("TIMEOUT (calculado) - Reintento %d/%d\n", attempts, MAX_RETRIES);
-        
-        next_attempt:; // Etiqueta para retransmitir en el bucle externo
     }
     
     // Si llegamos aquí, fallaron todos los intentos
