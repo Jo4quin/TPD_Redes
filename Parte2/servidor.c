@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
         // Buffer para lecturas parciales
         uint8_t buffer[BUFFER_SIZE];
-        App_PDU pdu_buffer;
+        uint8_t pdu_buffer[MAX_PDU_SIZE];
         size_t pdu_offset = 0;
         int pdu_count = 0;
 
@@ -108,22 +108,22 @@ int main(int argc, char* argv[]) {
             }
 
             // Procesar bytes recibidos
-            uint8_t* pdu_bytes = (uint8_t*)&pdu_buffer;
             for (ssize_t i = 0; i < received; i++) {
-                if (pdu_offset < sizeof(App_PDU)) {
-                    pdu_bytes[pdu_offset++] = buffer[i];
+                if (pdu_offset < MAX_PDU_SIZE) {
+                    pdu_buffer[pdu_offset++] = buffer[i];
                 }
 
                 // Verificar si encontramos el delimitador
-                if (buffer[i] == pdu_buffer.delimiter && pdu_offset >= MIN_PDU_SIZE) {
+                if (buffer[i] == DELIMITER && pdu_offset >= MIN_PDU_SIZE) {
                     // PDU completa recibida - obtener timestamp de destino
                     uint64_t dest_ts = get_timestamp_us();
 
-                    // Extraer timestamp de origen directamente del struct
-                    uint64_t origin_ts = pdu_buffer.o_timestamp;
+                    // Extraer timestamp de origen
+                    uint64_t origin_ts;
+                    memcpy(&origin_ts, pdu_buffer, sizeof(uint64_t));
 
                     // Calcular one-way delay
-                    int64_t delay_us = (int64_t)dest_ts - (int64_t)o_ts;
+                    int64_t delay_us = (int64_t)dest_ts - (int64_t)origin_ts;
                     double delay_sec = (double)delay_us / 1000000.0;
 
                     pdu_count++;
