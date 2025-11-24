@@ -2,11 +2,10 @@
 #include <getopt.h>
 
 void print_usage(const char* prog) {
-    fprintf(stderr, "Uso: %s -h <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg> [-s <payload_size>]\n", prog);
-    fprintf(stderr, "  -h: IP del servidor\n");
+    fprintf(stderr, "Uso: %s -h <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg>\n", prog);
+    fprintf(stderr, "  -a: IP del servidor\n");
     fprintf(stderr, "  -d: intervalo entre envíos en milisegundos\n");
     fprintf(stderr, "  -N: duración total de la prueba en segundos\n");
-    fprintf(stderr, "  -s: tamaño del payload (500-1000, default: 500)\n");
     fprintf(stderr, "Ejemplo: %s -h 192.168.1.100 -d 50 -N 10\n", prog);
 }
 
@@ -14,15 +13,13 @@ int main(int argc, char* argv[]) {
     char* server_ip = NULL;
     int interval_ms = 0;
     int duration_sec = 0;
-    int payload_size = MIN_PAYLOAD;
     int opt;
 
-    while ((opt = getopt(argc, argv, "h:d:N:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:d:N:s:")) != -1) {
         switch (opt) {
-            case 'h': server_ip = optarg; break;
+            case 'a': server_ip = optarg; break;
             case 'd': interval_ms = atoi(optarg); break;
             case 'N': duration_sec = atoi(optarg); break;
-            case 's': payload_size = atoi(optarg); break;
             default: print_usage(argv[0]); return 1;
         }
     }
@@ -32,18 +29,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (payload_size < MIN_PAYLOAD || payload_size > MAX_PAYLOAD) {
-        fprintf(stderr, "Error: payload debe estar entre %d y %d\n", MIN_PAYLOAD, MAX_PAYLOAD);
-        return 1;
-    }
-
     printf("\n╔════════════════════════════════════════╗\n");
     printf("║  CLIENTE TCP - ONE WAY DELAY           ║\n");
     printf("╠════════════════════════════════════════╣\n");
     printf("║  Servidor: %-27s ║\n", server_ip);
     printf("║  Intervalo: %-4d ms                    ║\n", interval_ms);
     printf("║  Duración: %-4d seg                    ║\n", duration_sec);
-    printf("║  Payload: %-5d bytes                  ║\n", payload_size);
     printf("╚════════════════════════════════════════╝\n");
 
     // Crear socket TCP
@@ -83,6 +74,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    
     int pdu_count=0;
     int duration_us=duration_sec*1000;
     int current_timeout_ms=duration_us;
@@ -90,7 +82,7 @@ int main(int argc, char* argv[]) {
     gettimeofday(&start_time, NULL);
 
     while (current_timeout_ms>0) {
-        payload_size= rand() % 501 + 500;  // generar num entre 0 y 500 y sumarle 500 -> conseguir numero entre 500 y 1000
+        int payload_size= rand() % 501 + 500;  // generar num entre 0 y 500 y sumarle 500 -> conseguir numero entre 500 y 1000
         size_t pdu_size = sizeof(uint64_t) + payload_size + 1;
         memset(pdu + sizeof(uint64_t), FILLER_BYTE, payload_size); // Llenar payload con 0x20 (filler)
         pdu[pdu_size - 1] = DELIMITER; // Poner delimitador al final
