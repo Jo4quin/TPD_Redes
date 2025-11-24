@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 
     while (pdu_count < total_pdus) {
         // Obtener timestamp justo antes de enviar
-        pdu.origin_timestamp = get_timestamp_us();
+        pdu.o_timestamp = get_timestamp_us();
 
         // Enviar PDU (solo los bytes necesarios)
         ssize_t sent = send(s, &pdu, pdu_size, 0);

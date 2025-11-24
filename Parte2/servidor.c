@@ -120,10 +120,10 @@ int main(int argc, char* argv[]) {
                     uint64_t dest_ts = get_timestamp_us();
 
                     // Extraer timestamp de origen directamente del struct
-                    uint64_t origin_ts = pdu_buffer.origin_timestamp;
+                    uint64_t origin_ts = pdu_buffer.o_timestamp;
 
                     // Calcular one-way delay
-                    int64_t delay_us = (int64_t)dest_ts - (int64_t)origin_ts;
+                    int64_t delay_us = (int64_t)dest_ts - (int64_t)o_ts;
                     double delay_sec = (double)delay_us / 1000000.0;
 
                     pdu_count++;

@@ -30,7 +30,7 @@
 // ESTRUCTURA PDU (Protocol Data Unit)
 // ============================================
 typedef struct {
-    uint64_t origin_timestamp;      // 8 bytes - timestamp en microsegundos
+    uint64_t o_timestamp;      // 8 bytes - timestamp en microsegundos
     uint8_t payload[MAX_PAYLOAD];   // 1000 bytes máximo (filler 0x20)
     uint8_t delimiter;              // 1 byte - siempre '|' (ASCII 124)
 } __attribute__((packed)) App_PDU;
