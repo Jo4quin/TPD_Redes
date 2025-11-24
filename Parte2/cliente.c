@@ -76,29 +76,26 @@ int main(int argc, char* argv[]) {
     freeaddrinfo(servinfo);
 
     // Preparar buffer de PDU
-    size_t pdu_size = sizeof(uint64_t) + payload_size + 1;
-    uint8_t* pdu = malloc(pdu_size);
+    uint8_t* pdu = malloc(MAX_PDU_SIZE);
     if (!pdu) {
         perror("Error en malloc()");
         close(s);
         return 1;
     }
 
-    // Llenar payload con 0x20 (filler)
-    memset(pdu + sizeof(uint64_t), FILLER_BYTE, payload_size);
-    // Poner delimitador al final
-    pdu[pdu_size - 1] = DELIMITER;
+    int pdu_count=0;
+    int duration_us=duration_sec*1000;
+    int current_timeout_ms=duration_us;
+    struct timeval start_time, current_time,elapsed_time;
+    gettimeofday(&start_time, NULL);
 
-    // Calcular cantidad de PDUs a enviar
-    int total_pdus = (duration_sec * 1000) / interval_ms;
-    printf("Enviando %d PDUs de %zu bytes cada %d ms...\n\n", total_pdus, pdu_size, interval_ms);
+    while (current_timeout_ms>0) {
+        payload_size= rand() % 501 + 500;  // generar num entre 0 y 500 y sumarle 500 -> conseguir numero entre 500 y 1000
+        size_t pdu_size = sizeof(uint64_t) + payload_size + 1;
+        memset(pdu + sizeof(uint64_t), FILLER_BYTE, payload_size); // Llenar payload con 0x20 (filler)
+        pdu[pdu_size - 1] = DELIMITER; // Poner delimitador al final
 
-    struct timeval start, now;
-    gettimeofday(&start, NULL);
-    int pdu_count = 0;
-
-    while (pdu_count < total_pdus) {
-        // Obtener timestamp justo antes de enviar
+        // Obtener timestamp es lo ultimo que hacemos, justo antes de enviar
         uint64_t timestamp = get_timestamp_us();
         memcpy(pdu, &timestamp, sizeof(uint64_t));
 
@@ -110,11 +107,21 @@ int main(int argc, char* argv[]) {
         }
 
         pdu_count++;
-        printf("\rPDUs enviados: %d/%d", pdu_count, total_pdus);
+        printf("\rPDUs enviados: %d", pdu_count);
         fflush(stdout);
 
         // Esperar el intervalo
         usleep(interval_ms * 1000);
+
+        // Recalcular el tiempo restante
+        gettimeofday(&current_time, NULL);
+        
+        // Calcular tiempo transcurrido en milisegundos
+        elapsed_time.tv_sec = current_time.tv_sec - start_time.tv_sec;
+        elapsed_time.tv_usec = current_time.tv_usec - start_time.tv_usec;
+        long elapsed_ms = (elapsed_time.tv_sec * 1000) + (elapsed_time.tv_usec / 1000);
+        
+        current_timeout_ms = duration_us - (int)elapsed_ms;
     }
 
     printf("\n\nEnvío completado: %d PDUs enviados\n", pdu_count);
