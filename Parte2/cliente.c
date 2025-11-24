@@ -2,8 +2,8 @@
 #include <getopt.h>
 
 void print_usage(const char* prog) {
-    fprintf(stderr, "Uso: %s -h <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg> [-s <payload_size>]\n", prog);
-    fprintf(stderr, "  -h: IP del servidor\n");
+    fprintf(stderr, "Uso: %s -a <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg> [-s <payload_size>]\n", prog);
+    fprintf(stderr, "  -a: IP del servidor\n");
     fprintf(stderr, "  -d: intervalo entre envíos en milisegundos\n");
     fprintf(stderr, "  -N: duración total de la prueba en segundos\n");
     fprintf(stderr, "  -s: tamaño del payload (500-1000, default: 500)\n");
@@ -17,9 +17,9 @@ int main(int argc, char* argv[]) {
     int payload_size = MIN_PAYLOAD;
     int opt;
 
-    while ((opt = getopt(argc, argv, "h:d:N:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:d:N:s:")) != -1) {
         switch (opt) {
-            case 'h': server_ip = optarg; break;
+            case 'a': server_ip = optarg; break;
             case 'd': interval_ms = atoi(optarg); break;
             case 'N': duration_sec = atoi(optarg); break;
             case 's': payload_size = atoi(optarg); break;
@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
     // Poner delimitador después del payload
     // El delimitador va en la posición payload_size (justo después del payload usado)
     pdu.payload[payload_size] = DELIMITER;
+    pdu.delimiter=DELIMITER;
     
     // Tamaño real a enviar: timestamp + payload_size + delimiter
     size_t pdu_size = sizeof(uint64_t) + payload_size + 1;
