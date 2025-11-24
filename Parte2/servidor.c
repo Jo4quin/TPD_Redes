@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Verificar si encontramos el delimitador
-                if (buffer[i] == DELIMITER && pdu_offset >= MIN_PDU_SIZE) {
+                if (buffer[i] == pdu_buffer.delimiter && pdu_offset >= MIN_PDU_SIZE) {
                     // PDU completa recibida - obtener timestamp de destino
                     uint64_t dest_ts = get_timestamp_us();
 
