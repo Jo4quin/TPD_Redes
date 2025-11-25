@@ -1,14 +1,10 @@
 #include "../include/common.h"
 #include <poll.h>
 
-// ============================================
-// CONFIGURACION DE CONCURRENCIA
-// ============================================
-#define MAX_CLIENTS 10  // N definido en tiempo de compilacion
 
-// ============================================
-// ESTADO DEL CLIENTE
-// ============================================
+#define MAX_CLIENTS 10
+
+
 typedef struct {
     int activo;
     struct sockaddr_in addr;
@@ -20,15 +16,13 @@ typedef struct {
     uint8_t last_seq;
 } ClientState;
 
+
 ClientState clients[MAX_CLIENTS];
 
-// ============================================
-// BUSCAR O CREAR CLIENTE
-// ============================================
+
 ClientState* find_or_create_client(struct sockaddr_in* addr, socklen_t addr_len) {
     int empty_slot = -1;
     
-    // Buscar cliente existente por IP:puerto
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].activo) {
             if (clients[i].addr.sin_addr.s_addr == addr->sin_addr.s_addr &&
@@ -40,7 +34,6 @@ ClientState* find_or_create_client(struct sockaddr_in* addr, socklen_t addr_len)
         }
     }
     
-    // Cliente nuevo - usar slot vacio
     if (empty_slot != -1) {
         memset(&clients[empty_slot], 0, sizeof(ClientState));
         clients[empty_slot].activo = 1;
@@ -58,9 +51,7 @@ ClientState* find_or_create_client(struct sockaddr_in* addr, socklen_t addr_len)
     return NULL;
 }
 
-// ============================================
-// LIBERAR CLIENTE
-// ============================================
+
 void release_client(ClientState* client) {
     if (client->file) {
         fclose(client->file);
@@ -69,9 +60,7 @@ void release_client(ClientState* client) {
     memset(client, 0, sizeof(ClientState));
 }
 
-// ============================================
-// ENVIAR ACK
-// ============================================
+
 void send_ack(int socket, ClientState* client, uint8_t seq_num, const char* error_msg) {
     App_PDU ack;
     memset(&ack, 0, sizeof(App_PDU));
@@ -90,9 +79,7 @@ void send_ack(int socket, ClientState* client, uint8_t seq_num, const char* erro
     printf("  -> ACK enviado (seq=%d)\n", seq_num);
 }
 
-// ============================================
-// MANEJAR HELLO
-// ============================================
+
 void handle_hello(int socket, App_PDU* pdu, ClientState* client) {
     printf("  [HELLO] Credencial: %s\n", pdu->data);
     
@@ -107,9 +94,7 @@ void handle_hello(int socket, App_PDU* pdu, ClientState* client) {
     }
 }
 
-// ============================================
-// MANEJAR WRQ
-// ============================================
+
 void handle_wrq(int socket, App_PDU* pdu, ClientState* client) {
     printf("  [WRQ] Filename: %s\n", pdu->data);
     
@@ -140,9 +125,7 @@ void handle_wrq(int socket, App_PDU* pdu, ClientState* client) {
     send_ack(socket, client, 1, NULL);
 }
 
-// ============================================
-// MANEJAR DATA
-// ============================================
+
 void handle_data(int socket, App_PDU* pdu, ClientState* client, int bytes_recv) {
     printf("  [DATA] seq=%d, bytes=%d\n", pdu->seq_num, bytes_recv - PDU_HEADER_SIZE);
     
@@ -169,9 +152,7 @@ void handle_data(int socket, App_PDU* pdu, ClientState* client, int bytes_recv) 
     send_ack(socket, client, pdu->seq_num, NULL);
 }
 
-// ============================================
-// MANEJAR FIN
-// ============================================
+
 void handle_fin(int socket, App_PDU* pdu, ClientState* client) {
     printf("  [FIN] seq=%d\n", pdu->seq_num);
     
@@ -186,16 +167,14 @@ void handle_fin(int socket, App_PDU* pdu, ClientState* client) {
     release_client(client);
 }
 
-// ============================================
-// MAIN
-// ============================================
+
 int main(int argc, char* argv[]) {
-    printf("\n+==========================================+\n");
+    printf("\n*==========================================*\n");
     printf("|  SERVIDOR STOP & WAIT                    |\n");
-    printf("+------------------------------------------+\n");
+    printf("*==========================================*\n");
     printf("|  Puerto: %-30s |\n", SERVER_PORT);
     printf("|  Max clientes: %-24d |\n", MAX_CLIENTS);
-    printf("+==========================================+\n");
+    printf("*==========================================*\n");
     
     memset(clients, 0, sizeof(clients));
     
@@ -232,9 +211,6 @@ int main(int argc, char* argv[]) {
     printf("\nServidor escuchando en puerto %s\n\n", SERVER_PORT);
     freeaddrinfo(servinfo);
     
-    // ========================================
-    // LOOP PRINCIPAL CON POLL
-    // ========================================
     struct pollfd fds[1];
     fds[0].fd = s;
     fds[0].events = POLLIN;
@@ -244,7 +220,7 @@ int main(int argc, char* argv[]) {
     socklen_t addr_len;
     
     while (1) {
-        int poll_result = poll(fds, 1, -1);  // Bloqueante
+        int poll_result = poll(fds, 1, -1);
         
         if (poll_result < 0) {
             perror("poll");
