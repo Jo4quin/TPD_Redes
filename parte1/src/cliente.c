@@ -241,26 +241,26 @@ int main(int argc, char* argv[]) {
     freeaddrinfo(servinfo);
 
     if (fase_hello(s, "g23-889d") != 0) {
-        fprintf(stderr, "💀 Fallo en FASE 1 (HELLO)\n");
+        fprintf(stderr, "Fallo en FASE 1 (HELLO)\n");
         close(s);
         return 1;
     }
     
     if (fase_wrq(s, remote_name) != 0) {
-        fprintf(stderr, "💀 Fallo en FASE 2 (WRQ)\n");
+        fprintf(stderr, "Fallo en FASE 2 (WRQ)\n");
         close(s);
         return 1;
     }
     
     uint8_t last_data_seq = 0;
     if (fase_data(s, local_file,&last_data_seq) != 0) {
-        fprintf(stderr, "💀 Fallo en FASE 3 (DATA)\n");
+        fprintf(stderr, "Fallo en FASE 3 (DATA)\n");
         close(s);
         return 1;
     }
     
     if (fase_fin(s, remote_name, last_data_seq) != 0) {  // el seq depende del último DATA
-        fprintf(stderr, "💀 Fallo en FASE 4 (FIN)\n");
+        fprintf(stderr, "Fallo en FASE 4 (FIN)\n");
         close(s);
         return 1;
     }
