@@ -1,5 +1,5 @@
-#include "../include/common.h"
 #include <poll.h>
+#include "../include/common.h"
 
 
 #define MAX_CLIENTS 10

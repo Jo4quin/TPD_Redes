@@ -1,7 +1,9 @@
 #include "../include/common.h"
 #include <getopt.h>
 
+
 #define BUFFER_SIZE 1009
+
 
 int main(int argc, char* argv[]) {
     char* output_file = "one_way_delay.csv";
@@ -16,15 +18,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    printf("\n╔════════════════════════════════════════╗\n");
-    printf("║  SERVIDOR TCP - ONE WAY DELAY          ║\n");
-    printf("╠════════════════════════════════════════╣\n");
-    printf("║  Puerto: %-29s ║\n", SERVER_PORT);
-    printf("║  Archivo: %-28s ║\n", output_file);
-    printf("║  Presiona Ctrl+C para salir            ║\n");
-    printf("╚════════════════════════════════════════╝\n");
+    printf("\n*========================================*\n");
+    printf("|  SERVIDOR TCP - ONE WAY DELAY          |\n");
+    printf("*========================================*\n");
+    printf("|  Puerto: %-29s |\n", SERVER_PORT);
+    printf("|  Archivo: %-28s |\n", output_file);
+    printf("*========================================*\n");
 
-    // Crear socket TCP
     struct addrinfo hints, *servinfo;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -79,7 +79,6 @@ int main(int argc, char* argv[]) {
         inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
         printf("Cliente conectado: %s:%d\n\n", client_ip, ntohs(client_addr.sin_port));
 
-        // Abrir archivo CSV
         FILE* csv = fopen(output_file, "w");
         if (!csv) {
             perror("Error abriendo archivo CSV");
@@ -88,7 +87,6 @@ int main(int argc, char* argv[]) {
         }
         fprintf(csv, "Numero,One_Way_Delay_seg\n");
 
-        // Buffer para lecturas parciales
         uint8_t buffer[BUFFER_SIZE];
         uint8_t pdu_buffer[MAX_PDU_SIZE];
         memset(&pdu_buffer,0,MAX_PDU_SIZE);
@@ -109,26 +107,20 @@ int main(int argc, char* argv[]) {
                 break;
             }
 
-            // Procesar bytes recibidos
             for (ssize_t i = 0; i < received; i++) {
                 pdu_buffer[pdu_offset++] = buffer[i];
 
-                // Verificar si encontramos el delimitador
                 if (buffer[i] == DELIMITER && pdu_offset>7) {  // porque puede pasar que por probabilidad haya un byte=124 en el timestamp
-                    // PDU completa recibida - obtener timestamp de destino
                     uint64_t dest_ts = get_timestamp_us();
 
-                    // Extraer timestamp de origen
                     uint64_t origin_ts;
                     memcpy(&origin_ts, pdu_buffer, sizeof(uint64_t));
 
-                    // Calcular one-way delay
                     int64_t delay_us = (int64_t)dest_ts - (int64_t)origin_ts;
                     double delay_sec = (double)delay_us / 1000000.0;
 
                     pdu_count++;
 
-                    // Loguear en CSV
                     fprintf(csv, "%d,%.6f\n", pdu_count, delay_sec);
                     fflush(csv);
 
@@ -136,7 +128,6 @@ int main(int argc, char* argv[]) {
                     //        pdu_count, delay_sec, pdu_offset);
                     fflush(stdout);
 
-                    // Reiniciar buffer de PDU
                     pdu_offset = 0;
                 }
             }

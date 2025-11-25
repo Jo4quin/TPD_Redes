@@ -1,5 +1,6 @@
-#include "../include/common.h"
 #include <getopt.h>
+#include "../include/common.h"
+
 
 void print_usage(const char* prog) {
     fprintf(stderr, "Uso: %s -a <IP_SERVIDOR> -d <intervalo_ms> -N <duracion_seg>\n", prog);
@@ -8,6 +9,7 @@ void print_usage(const char* prog) {
     fprintf(stderr, "  -N: duración total de la prueba en segundos\n");
     fprintf(stderr, "Ejemplo: %s -h 192.168.1.100 -d 50 -N 10\n", prog);
 }
+
 
 int main(int argc, char* argv[]) {
     char* server_ip = NULL;
@@ -29,15 +31,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    printf("\n╔════════════════════════════════════════╗\n");
-    printf("║  CLIENTE TCP - ONE WAY DELAY           ║\n");
-    printf("╠════════════════════════════════════════╣\n");
-    printf("║  Servidor: %-27s ║\n", server_ip);
-    printf("║  Intervalo: %-4d ms                    ║\n", interval_ms);
-    printf("║  Duración: %-4d seg                    ║\n", duration_sec);
-    printf("╚════════════════════════════════════════╝\n");
+    printf("\n*========================================*\n");
+    printf("|  CLIENTE TCP - ONE WAY DELAY           |\n");
+    printf("*========================================*\n");
+    printf("|  Servidor: %-27s |\n", server_ip);
+    printf("|  Intervalo: %-4d ms                    |\n", interval_ms);
+    printf("|  Duración: %-4d seg                    |\n", duration_sec);
+    printf("*========================================*\n");
 
-    // Crear socket TCP
     struct addrinfo hints, *servinfo;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -66,7 +67,6 @@ int main(int argc, char* argv[]) {
     printf("Conectado!\n\n");
     freeaddrinfo(servinfo);
 
-    // Preparar buffer de PDU
     uint8_t* pdu = malloc(MAX_PDU_SIZE);
     if (!pdu) {
         perror("Error en malloc()");
@@ -87,11 +87,9 @@ int main(int argc, char* argv[]) {
         memset(pdu + sizeof(uint64_t), FILLER_BYTE, payload_size); // Llenar payload con 0x20 (filler)
         pdu[pdu_size - 1] = DELIMITER; // Poner delimitador al final
 
-        // Obtener timestamp es lo ultimo que hacemos, justo antes de enviar
         uint64_t timestamp = get_timestamp_us();
         memcpy(pdu, &timestamp, sizeof(uint64_t));
 
-        // Enviar PDU completa
         ssize_t sent = send(s, pdu, pdu_size, 0);
         if (sent < 0) {
             perror("Error en send()");
@@ -102,13 +100,10 @@ int main(int argc, char* argv[]) {
         printf("\rPDUs enviados: %d", pdu_count);
         fflush(stdout);
 
-        // Esperar el intervalo
         usleep(interval_ms * 1000);
 
-        // Recalcular el tiempo restante
         gettimeofday(&current_time, NULL);
         
-        // Calcular tiempo transcurrido en milisegundos
         elapsed_time.tv_sec = current_time.tv_sec - start_time.tv_sec;
         elapsed_time.tv_usec = current_time.tv_usec - start_time.tv_usec;
         long elapsed_ms = (elapsed_time.tv_sec * 1000) + (elapsed_time.tv_usec / 1000);
