@@ -28,7 +28,7 @@ int send_and_wait(int socket, App_PDU* pdu, uint8_t expected_seq, int data_size)
         struct timeval start_time, current_time, elapsed_time;
         gettimeofday(&start_time, NULL);
         
-        printf("Esperando ACK (Max %d ms)...\n", TIMEOUT_MSEC);
+        printf("Esperando ACK (max %d ms)...\n", TIMEOUT_MSEC);
 
         struct pollfd pfd;   // solo queremos monitorear 1 fd, el de nuestro unico socket
         pfd.fd = socket;
@@ -108,7 +108,7 @@ int send_and_wait(int socket, App_PDU* pdu, uint8_t expected_seq, int data_size)
 
 
 int fase_hello(int socket, const char* credencial) {
-    printf("\n===== FASE 1: HELLO (Autenticación) =====\n");
+    printf("\n===== FASE 1: HELLO =====\n");
     
     App_PDU pdu;
     memset(&pdu, 0, sizeof(App_PDU));
@@ -123,7 +123,7 @@ int fase_hello(int socket, const char* credencial) {
 
 
 int fase_wrq(int socket, const char* filename) {
-    printf("\n===== FASE 2: WRQ (Write Request) =====\n");
+    printf("\n===== FASE 2: WRQ =====\n");
     
     App_PDU pdu;
     memset(&pdu, 0, sizeof(App_PDU));
@@ -138,7 +138,7 @@ int fase_wrq(int socket, const char* filename) {
 
 
 int fase_data(int socket, const char* filepath, uint8_t* last_seq_out) {
-    printf("\n===== FASE 3: DATA (Transferencia con Stop & Wait) =====\n");
+    printf("\n===== FASE 3: DATA =====\n");
     
     FILE* file = fopen(filepath, "rb");
     if (!file) {
@@ -179,7 +179,7 @@ int fase_data(int socket, const char* filepath, uint8_t* last_seq_out) {
 
 
 int fase_fin(int socket, const char* filename, int last_seq) {
-    printf("\n===== FASE 4: FIN (Finalización) =====\n");
+    printf("\n===== FASE 4: FIN =====\n");
     
     App_PDU pdu;
     memset(&pdu, 0, sizeof(App_PDU));
