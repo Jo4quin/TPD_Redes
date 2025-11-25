@@ -1,7 +1,7 @@
 #include "common.h"
 #include <getopt.h>
 
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 1009
 
 int main(int argc, char* argv[]) {
     char* output_file = "one_way_delay.csv";
@@ -96,6 +96,7 @@ int main(int argc, char* argv[]) {
         int pdu_count = 0;
 
         while (1) {
+            memset(&buffer,0,BUFFER_SIZE);
             ssize_t received = recv(client_sock, buffer, BUFFER_SIZE, 0);
             
             if (received < 0) {
@@ -110,12 +111,10 @@ int main(int argc, char* argv[]) {
 
             // Procesar bytes recibidos
             for (ssize_t i = 0; i < received; i++) {
-                if (pdu_offset < MAX_PDU_SIZE) {
-                    pdu_buffer[pdu_offset++] = buffer[i];
-                }
+                pdu_buffer[pdu_offset++] = buffer[i];
 
                 // Verificar si encontramos el delimitador
-                if (buffer[i] == DELIMITER && pdu_offset >= MIN_PDU_SIZE) {
+                if (buffer[i] == DELIMITER && pdu_offset>7) {  // porque puede pasar que por probabilidad haya un byte=124 en el timestamp
                     // PDU completa recibida - obtener timestamp de destino
                     uint64_t dest_ts = get_timestamp_us();
 
@@ -133,8 +132,8 @@ int main(int argc, char* argv[]) {
                     fprintf(csv, "%d,%.6f\n", pdu_count, delay_sec);
                     fflush(csv);
 
-                    printf("\rPDU #%d: OWD = %.6f seg (size=%zu bytes)", 
-                           pdu_count, delay_sec, pdu_offset);
+                    // printf("\rPDU #%d: OWD = %.6f seg (size=%zu bytes)", 
+                    //        pdu_count, delay_sec, pdu_offset);
                     fflush(stdout);
 
                     // Reiniciar buffer de PDU
