@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../include/common.h"
 #include <getopt.h>
 
 #define BUFFER_SIZE 1009

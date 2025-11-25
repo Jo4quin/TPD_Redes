@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../include/common.h"
 #include <getopt.h>
 
 void print_usage(const char* prog) {
